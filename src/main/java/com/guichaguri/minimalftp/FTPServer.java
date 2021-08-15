@@ -35,6 +35,10 @@ import javax.net.ssl.SSLContext;
  */
 public class FTPServer implements Closeable {
 
+    private String pasvHost;
+    private int pasvMinPort = 0;
+    private int pasvMaxPort = 0;
+
     protected final List<FTPConnection> connections = Collections.synchronizedList(new ArrayList<FTPConnection>());
     protected final List<IFTPListener> listeners = Collections.synchronizedList(new ArrayList<IFTPListener>());
 
@@ -258,7 +262,7 @@ public class FTPServer implements Closeable {
      * @throws IOException When an error occurs
      */
     protected FTPConnection createConnection(Socket socket) throws IOException {
-        return new FTPConnection(this, socket, idleTimeout, bufferSize);
+        return new FTPConnection(this, socket, idleTimeout, bufferSize, pasvHost, pasvMinPort, pasvMaxPort);
     }
 
     /**
@@ -347,4 +351,15 @@ public class FTPServer implements Closeable {
         }
     }
 
+    public void setPasvHost(String pasvHost) {
+        this.pasvHost = pasvHost;
+    }
+
+    public void setPasvMinPort(int pasvMinPort) {
+        this.pasvMinPort = pasvMinPort;
+    }
+
+    public void setPasvMaxPort(int pasvMaxPort) {
+        this.pasvMaxPort = pasvMaxPort;
+    }
 }
