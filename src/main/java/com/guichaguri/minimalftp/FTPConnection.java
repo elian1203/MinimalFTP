@@ -43,10 +43,6 @@ import java.util.*;
  */
 public class FTPConnection implements Closeable {
 
-	private String pasvHost;
-	private int pasvMinPort;
-	private int pasvMaxPort;
-
 	protected final Map<String, CommandInfo> commands = new HashMap<>();
 	protected final Map<String, CommandInfo> siteCommands = new HashMap<>();
 	protected final List<String> features = new ArrayList<>();
@@ -79,7 +75,7 @@ public class FTPConnection implements Closeable {
 	 * @param bufferSize  The buffer size in bytes
 	 * @throws IOException When an I/O error occurs
 	 */
-	public FTPConnection(FTPServer server, Socket con, int idleTimeout, int bufferSize, String pasvHost,
+	public FTPConnection(FTPServer server, Socket con, int idleTimeout, int bufferSize,
 	                     int pasvMinPort, int pasvMaxPort) throws IOException {
 		this.server = server;
 		this.con = con;
@@ -91,7 +87,7 @@ public class FTPConnection implements Closeable {
 		this.lastUpdate = System.currentTimeMillis();
 		con.setSoTimeout(timeout);
 
-		this.conHandler = new ConnectionHandler(this, pasvHost, pasvMinPort, pasvMaxPort);
+		this.conHandler = new ConnectionHandler(this, pasvMinPort, pasvMaxPort);
 		this.fileHandler = new FileHandler(this);
 
 		this.thread = new ConnectionThread();

@@ -38,9 +38,8 @@ import java.net.UnknownHostException;
  */
 public class ConnectionHandler {
 
-	private String pasvHost;
-	private int pasvMinPort;
-	private int pasvMaxPort;
+	private final int pasvMinPort;
+	private final int pasvMaxPort;
 
 	private final FTPConnection con;
 
@@ -57,9 +56,8 @@ public class ConnectionHandler {
 	private boolean secureData = false;
 	private boolean stop = false;
 
-	public ConnectionHandler(FTPConnection connection, String pasvHost, int pasvMinPort, int pasvMaxPort) {
+	public ConnectionHandler(FTPConnection connection, int pasvMinPort, int pasvMaxPort) {
 		this.con = connection;
-		this.pasvHost = pasvHost;
 		this.pasvMinPort = pasvMinPort;
 		this.pasvMaxPort = pasvMaxPort;
 	}
@@ -322,17 +320,17 @@ public class ConnectionHandler {
 		}
 		passive = true;
 
-		String host = passiveServer.getInetAddress().getHostAddress();
+		InetAddress clientAddress = con.getAddress();
+
+		String host;
 		int port = passiveServer.getLocalPort();
 
-		if (host.equals("0.0.0.0")) {
-			// Sends a valid address instead of a wildcard
+		if (clientAddress.isLoopbackAddress()) {
+			host = "127.0.0.1";
+		} else if (clientAddress.isAnyLocalAddress()) {
 			host = InetAddress.getLocalHost().getHostAddress();
-		}
-
-		if (pasvHost != null) {
-			// use specified host
-			host = pasvHost;
+		} else {
+			host = FTPServer.getPublicIp();
 		}
 
 		String[] addr = host.split("\\.");

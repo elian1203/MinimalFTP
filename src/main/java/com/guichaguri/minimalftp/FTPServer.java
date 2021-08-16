@@ -19,11 +19,12 @@ package com.guichaguri.minimalftp;
 import com.guichaguri.minimalftp.api.IFTPListener;
 import com.guichaguri.minimalftp.api.IUserAuthenticator;
 import com.guichaguri.minimalftp.impl.NoOpAuthenticator;
+
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.io.InputStreamReader;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +36,8 @@ import javax.net.ssl.SSLContext;
  */
 public class FTPServer implements Closeable {
 
-    private String pasvHost;
+    private static String publicIp;
+
     private int pasvMinPort = 0;
     private int pasvMaxPort = 0;
 
@@ -50,6 +52,22 @@ public class FTPServer implements Closeable {
 
     protected ServerSocket socket = null;
     protected ServerThread serverThread = null;
+
+    static {
+        try {
+            URL url = new URL("https://ipecho.net/plain");
+            URLConnection con = url.openConnection();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            publicIp = reader.readLine();
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static String getPublicIp() {
+        return publicIp;
+    }
 
     /**
      * Creates a new server
@@ -262,7 +280,7 @@ public class FTPServer implements Closeable {
      * @throws IOException When an error occurs
      */
     protected FTPConnection createConnection(Socket socket) throws IOException {
-        return new FTPConnection(this, socket, idleTimeout, bufferSize, pasvHost, pasvMinPort, pasvMaxPort);
+        return new FTPConnection(this, socket, idleTimeout, bufferSize,  pasvMinPort, pasvMaxPort);
     }
 
     /**
@@ -349,10 +367,6 @@ public class FTPServer implements Closeable {
                 update();
             }
         }
-    }
-
-    public void setPasvHost(String pasvHost) {
-        this.pasvHost = pasvHost;
     }
 
     public void setPasvMinPort(int pasvMinPort) {
